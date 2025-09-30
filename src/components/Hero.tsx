@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
 import heroImage from "@/assets/hero-tshirt.jpg";
-import LogoAnimation from "./LogoAnimation";
+
 import SignupLoginPopup from "./SignupLoginPopup";
 
 
@@ -34,9 +34,7 @@ export const Hero = ({ signedIn }: HeroProps) => {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Logo Animation Overlay */}
-      {showLogoAnim && (
-        <LogoAnimation onComplete={handleLogoFinish} />
-      )}
+
 
       {/* Signup/Login Popup after animation */}
       {showSignup && (
