@@ -22,8 +22,11 @@ export const Hero = () => {
       {/* Content */}
       <div className="relative z-10 container mx-auto px-4 text-center">
         <div className="max-w-4xl mx-auto space-y-8 animate-fade-in">
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold leading-tight">
-            ONYXIA Luxury Redefined
+          <h1 className="text-3xl md:text-5xl lg:text-7xl font-bold leading-tight">
+            ONYXIA
+          </h1>
+          <h1 className="text-3xl md:text-5xl lg:text-7xl font-bold leading-tight">
+            Luxury Redefined
           </h1>
           <h2 className="text-3xl md:text-5xl lg:text-6xl text-gradient font-light">
             Premium T-Shirts
