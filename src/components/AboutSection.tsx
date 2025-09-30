@@ -1,4 +1,4 @@
-import { Award, Shield, Sparkles, TrendingUp } from "lucide-react";
+import { Award, Shield, Sparkles, TrendingUp, Leaf, Heart } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
 export const AboutSection = () => {
@@ -22,6 +22,16 @@ export const AboutSection = () => {
       icon: TrendingUp,
       title: "Timeless Style",
       description: "Fashion that transcends trends and stands the test of time",
+    },
+    {
+      icon: Leaf,
+      title: "Eco-Friendly",
+      description: "Sustainably sourced organic cotton with carbon-neutral shipping",
+    },
+    {
+      icon: Heart,
+      title: "Ethical Production",
+      description: "Fair trade practices and safe working conditions guaranteed",
     },
   ];
 
@@ -64,7 +74,7 @@ export const AboutSection = () => {
           </div>
 
           {/* Features Grid */}
-          <div className="grid sm:grid-cols-2 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((feature, index) => {
               const Icon = feature.icon;
               return (

@@ -15,6 +15,8 @@ const products: Product[] = [
     image: product1,
     category: "Signature",
     isNew: true,
+    rating: 4.8,
+    reviewCount: 234,
   },
   {
     id: 2,
@@ -22,6 +24,9 @@ const products: Product[] = [
     price: 99,
     image: product2,
     category: "Essential",
+    rating: 4.6,
+    reviewCount: 156,
+    discount: 20,
   },
   {
     id: 3,
@@ -30,6 +35,8 @@ const products: Product[] = [
     image: product3,
     category: "Essential",
     isNew: true,
+    rating: 4.9,
+    reviewCount: 189,
   },
   {
     id: 4,
@@ -37,6 +44,8 @@ const products: Product[] = [
     price: 139,
     image: product4,
     category: "Limited",
+    rating: 5.0,
+    reviewCount: 98,
   },
   {
     id: 5,
@@ -44,6 +53,9 @@ const products: Product[] = [
     price: 129,
     image: product1,
     category: "Signature",
+    rating: 4.7,
+    reviewCount: 167,
+    discount: 15,
   },
   {
     id: 6,
@@ -51,6 +63,8 @@ const products: Product[] = [
     price: 109,
     image: product3,
     category: "Essential",
+    rating: 4.5,
+    reviewCount: 143,
   },
 ];
 

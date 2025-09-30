@@ -8,6 +8,8 @@ import { Newsletter } from "@/components/Newsletter";
 import { Footer } from "@/components/Footer";
 import { Product } from "@/components/ProductCard";
 import { useToast } from "@/hooks/use-toast";
+import { SocialProofPopup } from "@/components/SocialProofPopup";
+import { PromoBanner } from "@/components/PromoBanner";
 
 const Index = () => {
   const [cartOpen, setCartOpen] = useState(false);
@@ -55,6 +57,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
+      <PromoBanner />
       <Navigation
         cartItemsCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
         onCartClick={() => setCartOpen(true)}
@@ -76,6 +79,8 @@ const Index = () => {
         onUpdateQuantity={handleUpdateQuantity}
         onRemoveItem={handleRemoveItem}
       />
+
+      <SocialProofPopup />
     </div>
   );
 };
