@@ -37,7 +37,7 @@ export const Navigation = ({ cartItemsCount = 0, onCartClick }: NavigationProps)
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <div className="flex items-center space-x-3">
-            <img src={logo} alt="ONYXIA Logo" className="h-12 w-auto" />
+            <img src={logo} alt="ONYXIA Logo" className="h-20 w-auto drop-shadow-[0_0_15px_rgba(255,204,0,0.4)] transition-all duration-300 hover:drop-shadow-[0_0_25px_rgba(255,204,0,0.6)]" />
           </div>
 
           {/* Desktop Menu */}

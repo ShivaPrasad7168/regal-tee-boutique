@@ -10,13 +10,24 @@ import { Product } from "@/components/ProductCard";
 import { useToast } from "@/hooks/use-toast";
 import { SocialProofPopup } from "@/components/SocialProofPopup";
 import { PromoBanner } from "@/components/PromoBanner";
+import { AnimatedLogo } from "@/components/AnimatedLogo";
+import { SignupLoginPopup } from "@/components/SignupLoginPopup";
+import { ReferralPaymentPopup } from "@/components/ReferralPaymentPopup";
 
 const Index = () => {
   const [cartOpen, setCartOpen] = useState(false);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [loginOpen, setLoginOpen] = useState(false);
+  const [paymentOpen, setPaymentOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { toast } = useToast();
 
   const handleAddToCart = (product: Product) => {
+    if (!isLoggedIn) {
+      setLoginOpen(true);
+      return;
+    }
+
     setCartItems((prev) => {
       const existingItem = prev.find((item) => item.id === product.id);
       if (existingItem) {
@@ -34,6 +45,24 @@ const Index = () => {
       description: `${product.name} has been added to your cart.`,
     });
   };
+
+  const handleLoginSuccess = () => {
+    setIsLoggedIn(true);
+  };
+
+  const handleCheckout = () => {
+    if (!isLoggedIn) {
+      setLoginOpen(true);
+      return;
+    }
+    setCartOpen(false);
+    setPaymentOpen(true);
+  };
+
+  const totalAmount = cartItems.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
 
   const handleUpdateQuantity = (productId: number, newQuantity: number) => {
     if (newQuantity === 0) {
@@ -57,6 +86,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
+      <AnimatedLogo />
       <PromoBanner />
       <Navigation
         cartItemsCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
@@ -78,6 +108,19 @@ const Index = () => {
         items={cartItems}
         onUpdateQuantity={handleUpdateQuantity}
         onRemoveItem={handleRemoveItem}
+        onCheckout={handleCheckout}
+      />
+
+      <SignupLoginPopup
+        isOpen={loginOpen}
+        onClose={() => setLoginOpen(false)}
+        onSuccess={handleLoginSuccess}
+      />
+
+      <ReferralPaymentPopup
+        isOpen={paymentOpen}
+        onClose={() => setPaymentOpen(false)}
+        totalAmount={totalAmount}
       />
 
       <SocialProofPopup />
