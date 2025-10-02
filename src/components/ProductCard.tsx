@@ -6,15 +6,17 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 export interface Product {
-  id: number;
+  id: string; // uuid
   name: string;
+  description: string;
+  slug: string;
   price: number;
-  image: string;
-  category: string;
-  isNew?: boolean;
+  image: string; // local image path
+  category?: string;
+  discount?: number;
   rating?: number;
   reviewCount?: number;
-  discount?: number;
+  isNew?: boolean;
 }
 
 interface ProductCardProps {
@@ -35,7 +37,7 @@ export const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
     const wishlist = JSON.parse(localStorage.getItem("onyxia_wishlist") || "[]");
     let newWishlist;
     if (wishlist.includes(product.id)) {
-      newWishlist = wishlist.filter((id: number) => id !== product.id);
+  newWishlist = wishlist.filter((id: string) => id !== product.id);
     } else {
       newWishlist = [...wishlist, product.id];
     }
@@ -52,9 +54,9 @@ export const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
       <CardContent className="p-0">
         {/* Image Container */}
         <div className="relative aspect-square overflow-hidden bg-secondary">
-          <img
-            src={product.image}
-            alt={product.name}
+            <img
+              src={product.image}
+              alt={product.name}
             className={`w-full h-full object-cover transition-transform duration-500 ${
               isHovered ? "scale-110" : "scale-100"
             }`}
@@ -135,17 +137,17 @@ export const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <p className="text-sm text-muted-foreground uppercase tracking-wider">
-                {product.category}
+                  {product.slug}
               </p>
               <h3 className="font-semibold text-lg mt-1">{product.name}</h3>
-              {product.rating && (
+              {(product.rating || product.reviewCount) && (
                 <div className="flex items-center gap-2 mt-2">
                   <div className="flex items-center">
                     {[...Array(5)].map((_, i) => (
                       <Star
                         key={i}
                         className={`h-4 w-4 ${
-                          i < Math.floor(product.rating!)
+                          i < Math.floor(product.rating || 0)
                             ? "fill-primary text-primary"
                             : "text-muted-foreground/30"
                         }`}
@@ -169,6 +171,7 @@ export const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
                   <span className="text-2xl font-bold text-gradient">
                     ${Math.round(product.price * (1 - product.discount / 100))}
                   </span>
+                    <span className="ml-2 text-xs text-primary">-{product.discount}%</span>
                 </>
               ) : (
                 <span className="text-2xl font-bold text-gradient">
