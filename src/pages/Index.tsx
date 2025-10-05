@@ -9,10 +9,10 @@ import { Footer } from "@/components/Footer";
 import { Product } from "@/components/ProductCard";
 import { useToast } from "@/hooks/use-toast";
 import { SocialProofPopup } from "@/components/SocialProofPopup";
-import { PromoBanner } from "@/components/PromoBanner";
 import { AnimatedLogo } from "@/components/AnimatedLogo";
 import { SignupLoginPopup } from "@/components/SignupLoginPopup";
 import { ReferralPaymentPopup } from "@/components/ReferralPaymentPopup";
+import { DiscountPopup } from "@/components/DiscountPopup";
 
 const Index = () => {
   const [cartOpen, setCartOpen] = useState(false);
@@ -64,7 +64,7 @@ const Index = () => {
     0
   );
 
-  const handleUpdateQuantity = (productId: number, newQuantity: number) => {
+  const handleUpdateQuantity = (productId: string, newQuantity: number) => {
     if (newQuantity === 0) {
       handleRemoveItem(productId);
       return;
@@ -76,7 +76,7 @@ const Index = () => {
     );
   };
 
-  const handleRemoveItem = (productId: number) => {
+  const handleRemoveItem = (productId: string) => {
     setCartItems((prev) => prev.filter((item) => item.id !== productId));
     toast({
       title: "Removed from cart",
@@ -87,7 +87,6 @@ const Index = () => {
   return (
     <div className="min-h-screen">
       <AnimatedLogo />
-      <PromoBanner />
       <Navigation
         cartItemsCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
         onCartClick={() => setCartOpen(true)}
@@ -124,6 +123,7 @@ const Index = () => {
       />
 
       <SocialProofPopup />
+      <DiscountPopup />
     </div>
   );
 };

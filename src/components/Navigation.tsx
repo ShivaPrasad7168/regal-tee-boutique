@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { ShoppingCart, Search, Menu, X } from "lucide-react";
+import { ShoppingCart, Search, Menu, X, User, LogIn, UserPlus, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import logo from "@/assets/onyxia-logo.png";
 
 interface NavigationProps {
@@ -14,6 +14,7 @@ interface NavigationProps {
 export const Navigation = ({ cartItemsCount = 0, onCartClick }: NavigationProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -23,45 +24,52 @@ export const Navigation = ({ cartItemsCount = 0, onCartClick }: NavigationProps)
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const menuItems = ["Home", "Collection", "About", "Contact"];
+  const menuItems = [
+    { label: "Home", href: "#home" },
+    { label: "Gentle Trends", href: "#collection" },
+    { label: "Luxuria", href: "#collection" },
+    { label: "Contact Us", href: "#contact" },
+    { label: "About Us", href: "#about" },
+  ];
 
   return (
-    <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled
-          ? "bg-background/95 backdrop-blur-lg shadow-lg border-b border-border"
-          : "bg-transparent"
-      }`}
-    >
-      <div className="container mx-auto px-4 lg:px-8">
-        <div className="flex items-center justify-between h-20">
-          {/* Logo */}
-          <div className="flex items-center space-x-3">
-            <img src={logo} alt="ONYXIA Logo" className="h-20 w-auto drop-shadow-[0_0_15px_rgba(255,204,0,0.4)] transition-all duration-300 hover:drop-shadow-[0_0_25px_rgba(255,204,0,0.6)]" />
-          </div>
+    <>
+      <nav
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          isScrolled
+            ? "bg-background/95 backdrop-blur-lg shadow-lg border-b border-border"
+            : "bg-background/80 backdrop-blur-md border-b border-border/50"
+        }`}
+      >
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
+            {/* Left: Hamburger Menu */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9"
+              onClick={() => setSidebarOpen(true)}
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
 
-          {/* Desktop Menu */}
-          <div className="hidden md:flex items-center space-x-8">
-            {menuItems.map((item) => (
-              <a
-                key={item}
-                href={`#${item.toLowerCase()}`}
-                className="text-foreground hover:text-primary transition-colors duration-300 font-medium"
-              >
-                {item}
-              </a>
-            ))}
-          </div>
+            {/* Center: Logo */}
+            <div className="absolute left-1/2 -translate-x-1/2">
+              <img 
+                src={logo} 
+                alt="ONYXIA Logo" 
+                className="h-14 w-auto drop-shadow-[0_0_12px_rgba(255,204,0,0.3)] transition-all duration-300 hover:drop-shadow-[0_0_20px_rgba(255,204,0,0.5)]" 
+              />
+            </div>
 
-          {/* Actions */}
-          <div className="flex items-center space-x-4">
-            {/* Search */}
-            <div className="relative hidden lg:block">
+            {/* Right: Search & Cart */}
+            <div className="flex items-center space-x-2">
+              {/* Search */}
               {searchOpen ? (
                 <Input
                   type="search"
-                  placeholder="Search products..."
-                  className="w-64 bg-card/50 backdrop-blur border-border focus:border-primary"
+                  placeholder="Search..."
+                  className="w-40 sm:w-52 h-9 bg-card/50 backdrop-blur border-border focus:border-primary text-sm"
                   autoFocus
                   onBlur={() => setSearchOpen(false)}
                 />
@@ -69,59 +77,116 @@ export const Navigation = ({ cartItemsCount = 0, onCartClick }: NavigationProps)
                 <Button
                   variant="ghost"
                   size="icon"
+                  className="h-9 w-9"
                   onClick={() => setSearchOpen(true)}
                 >
-                  <Search className="h-5 w-5" />
+                  <Search className="h-4 w-4" />
                 </Button>
               )}
-            </div>
 
-            {/* Cart */}
+              {/* Cart */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="relative h-9 w-9"
+                onClick={onCartClick}
+              >
+                <ShoppingCart className="h-4 w-4" />
+                {cartItemsCount > 0 && (
+                  <Badge className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center p-0 text-[10px] bg-primary text-primary-foreground">
+                    {cartItemsCount}
+                  </Badge>
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      {/* Sidebar Overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 animate-fade-in"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div
+        className={`fixed top-0 left-0 h-full w-72 bg-card border-r border-border z-50 transform transition-transform duration-300 ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div className="flex flex-col h-full">
+          {/* Sidebar Header */}
+          <div className="flex items-center justify-between p-5 border-b border-border">
+            <img src={logo} alt="ONYXIA" className="h-12 w-auto" />
             <Button
               variant="ghost"
               size="icon"
-              className="relative"
-              onClick={onCartClick}
+              className="h-8 w-8"
+              onClick={() => setSidebarOpen(false)}
             >
-              <ShoppingCart className="h-5 w-5" />
-              {cartItemsCount > 0 && (
-                <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-primary text-primary-foreground">
-                  {cartItemsCount}
-                </Badge>
-              )}
+              <X className="h-5 w-5" />
             </Button>
+          </div>
 
-            {/* Mobile Menu */}
-            <Sheet>
-              <SheetTrigger asChild className="md:hidden">
-                <Button variant="ghost" size="icon">
-                  <Menu className="h-6 w-6" />
+          {/* Navigation Links */}
+          <div className="flex-1 overflow-y-auto py-6">
+            <nav className="space-y-1 px-3">
+              {menuItems.map((item) => (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  className="block px-4 py-3 rounded-lg text-foreground hover:bg-primary/10 hover:text-primary transition-colors duration-200 font-medium"
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  {item.label}
+                </a>
+              ))}
+            </nav>
+
+            <Separator className="my-6" />
+
+            {/* My Account Section */}
+            <div className="px-3 space-y-3">
+              <div className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                <User className="h-4 w-4" />
+                My Account
+              </div>
+              <div className="space-y-2">
+                <Button
+                  variant="outline"
+                  className="w-full justify-start gap-2 bg-background hover:bg-primary/10 hover:text-primary hover:border-primary"
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  <LogIn className="h-4 w-4" />
+                  Log In
                 </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-80 bg-card">
-                <div className="flex flex-col space-y-6 mt-8">
-                  {menuItems.map((item) => (
-                    <a
-                      key={item}
-                      href={`#${item.toLowerCase()}`}
-                      className="text-lg font-medium hover:text-primary transition-colors"
-                    >
-                      {item}
-                    </a>
-                  ))}
-                  <div className="pt-4 border-t border-border">
-                    <Input
-                      type="search"
-                      placeholder="Search products..."
-                      className="bg-background/50"
-                    />
-                  </div>
-                </div>
-              </SheetContent>
-            </Sheet>
+                <Button
+                  variant="default"
+                  className="w-full justify-start gap-2"
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  <UserPlus className="h-4 w-4" />
+                  Register
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Language Selector */}
+          <div className="p-5 border-t border-border">
+            <Button
+              variant="ghost"
+              className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
+            >
+              <Globe className="h-4 w-4" />
+              English
+            </Button>
           </div>
         </div>
       </div>
-    </nav>
+    </>
   );
 };
