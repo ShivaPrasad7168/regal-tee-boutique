@@ -26,20 +26,15 @@ export const Navigation = ({ cartItemsCount = 0, onCartClick }: NavigationProps)
 
   const menuItems = [
     { label: "Home", href: "#home" },
-    { label: "Gentle Trends", href: "#collection" },
-    { label: "Luxuria", href: "#collection" },
-    { label: "Contact Us", href: "#contact" },
-    { label: "About Us", href: "#about" },
+    { label: "Shop", href: "#collection" },
+    { label: "About", href: "#about" },
+    { label: "Contact", href: "#contact" },
   ];
 
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled
-            ? "bg-background/95 backdrop-blur-lg shadow-lg border-b border-border"
-            : "bg-background/80 backdrop-blur-md border-b border-border/50"
-        }`}
+        className="fixed top-0 left-0 right-0 z-50 bg-black border-b border-white/10"
       >
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
@@ -58,7 +53,7 @@ export const Navigation = ({ cartItemsCount = 0, onCartClick }: NavigationProps)
               <img 
                 src={logo} 
                 alt="ONYXIA Logo" 
-                className="h-14 w-auto drop-shadow-[0_0_12px_rgba(255,204,0,0.3)] transition-all duration-300 hover:drop-shadow-[0_0_20px_rgba(255,204,0,0.5)]" 
+                className="h-14 w-auto" 
               />
             </div>
 

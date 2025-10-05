@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { ShoppingCart, Heart, Star, Ruler } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -25,6 +26,7 @@ interface ProductCardProps {
 }
 
 export const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
+  const navigate = useNavigate();
   const [isHovered, setIsHovered] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
 
@@ -53,7 +55,10 @@ export const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
     >
       <CardContent className="p-0">
         {/* Image Container */}
-        <div className="relative aspect-square overflow-hidden bg-secondary">
+        <div 
+          className="relative aspect-square overflow-hidden bg-secondary cursor-pointer"
+          onClick={() => navigate(`/product/${product.id}`)}
+        >
             <img
               src={product.image}
               alt={product.name}
