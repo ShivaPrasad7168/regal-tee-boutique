@@ -1,3 +1,32 @@
+@layer utilities {
+  .animate-fade-in-scale {
+    animation: fadeInScale 1s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  @keyframes fadeInScale {
+    0% { opacity: 0; transform: scale(0.8); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  .animate-glow {
+    animation: glow 2s infinite alternate;
+  }
+  @keyframes glow {
+    0% { box-shadow: 0 0 20px 0 hsla(45,100%,51%,0.3); }
+    100% { box-shadow: 0 0 40px 10px hsla(45,100%,51%,0.6); }
+  }
+
+  .shadow-gold {
+    box-shadow: var(--shadow-gold);
+  }
+
+  .text-gradient-gold {
+    background: var(--gradient-gold);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+  }
+}
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

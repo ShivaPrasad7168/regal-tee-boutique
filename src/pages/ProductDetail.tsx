@@ -132,38 +132,12 @@ export const ProductDetail = () => {
   // Keyboard navigation for slider
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft") setSliderIndex((prev) => (prev - 1 + productImages.length) % productImages.length);
-      if (e.key === "ArrowRight") setSliderIndex((prev) => (prev + 1) % productImages.length);
+      if (e.key === "ArrowLeft") setSliderIndex((sliderIndex - 1 + productImages.length) % productImages.length);
+      if (e.key === "ArrowRight") setSliderIndex((sliderIndex + 1) % productImages.length);
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [productImages.length]);
-
-  // Touch/swipe support for mobile slider
-  useEffect(() => {
-    let startX: number | null = null;
-    const handleTouchStart = (e: TouchEvent) => {
-      startX = e.touches[0].clientX;
-    };
-    const handleTouchEnd = (e: TouchEvent) => {
-      if (startX === null) return;
-      const endX = e.changedTouches[0].clientX;
-      if (endX - startX > 50) setSliderIndex((prev) => (prev - 1 + productImages.length) % productImages.length);
-      if (endX - startX < -50) setSliderIndex((prev) => (prev + 1) % productImages.length);
-      startX = null;
-    };
-    const slider = document.getElementById("product-slider");
-    if (slider) {
-      slider.addEventListener("touchstart", handleTouchStart);
-      slider.addEventListener("touchend", handleTouchEnd);
-    }
-    return () => {
-      if (slider) {
-        slider.removeEventListener("touchstart", handleTouchStart);
-        slider.removeEventListener("touchend", handleTouchEnd);
-      }
-    };
-  }, [productImages.length]);
+  }, [sliderIndex, productImages.length]);
 
   if (!product) {
     return (
@@ -215,23 +189,23 @@ export const ProductDetail = () => {
         onCartClick={() => setCartOpen(true)}
       />
       
-  <div className="min-h-screen bg-background pt-10 pb-4">
-  <div className="container mx-auto px-2 sm:px-4 max-w-4xl lg:max-w-6xl">
+      <div className="min-h-screen bg-background pt-20 pb-12">
+      <div className="container mx-auto px-4 max-w-6xl">
         {/* Back Button */}
         <Button
           variant="ghost"
-          className="mb-6"
+          className="mt-8 mb-6"
           onClick={() => navigate("/")}
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Products
         </Button>
 
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-12 items-start">
+        <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-start">
           {/* Modern Product Image Carousel */}
           <div className="flex flex-col items-center justify-center">
             <Card className="overflow-hidden bg-secondary border-border w-full">
-              <div id="product-slider" className="aspect-square relative flex items-center justify-center select-none">
+              <div className="aspect-square relative flex items-center justify-center">
                 {/* Prev Button */}
                 <button
                   className="absolute left-2 top-1/2 -translate-y-1/2 bg-background/80 rounded-full p-2 shadow hover:bg-background"
@@ -459,10 +433,10 @@ export const ProductDetail = () => {
         />
 
         {/* Related Products */}
-        <div className="mt-10 pt-8 border-t border-border">
+        <div className="mt-16 pt-12 border-t border-border">
           <h2 className="text-2xl font-bold mb-8">RELATED PRODUCTS</h2>
-          <div className="grid grid-cols-3 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4">
-            {mockProducts.slice(0, 6).map((relatedProduct) => (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {mockProducts.slice(0, 4).map((relatedProduct) => (
               <Card
                 key={relatedProduct.id}
                 className="overflow-hidden cursor-pointer hover:border-primary/50 transition-all"

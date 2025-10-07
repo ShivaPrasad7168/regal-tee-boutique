@@ -8,7 +8,7 @@ import { Newsletter } from "@/components/Newsletter";
 import { Footer } from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
 import { SocialProofPopup } from "@/components/SocialProofPopup";
-import { AnimatedLogo } from "@/components/AnimatedLogo";
+import AnimatedLogo from "@/components/AnimatedLogo";
 import { SignupLoginPopup } from "@/components/SignupLoginPopup";
 import { ReferralPaymentPopup } from "@/components/ReferralPaymentPopup";
 import { DiscountPopup } from "@/components/DiscountPopup";
@@ -64,7 +64,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
-      <AnimatedLogo />
+  {/* AnimatedLogo removed: now only shown in App.tsx for intro animation */}
       <Navigation
         cartItemsCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
         onCartClick={() => setCartOpen(true)}
