@@ -1,9 +1,10 @@
 import { useCart } from "@/contexts/CartContext";
 import { useParams, useNavigate } from "react-router-dom";
-import { ShoppingCart as ShoppingCartIcon, Heart, Minus, Plus, ArrowLeft, Ruler } from "lucide-react";
+import { ShoppingCart as ShoppingCartIcon, Heart, Minus, Plus, ArrowLeft, Ruler, ShieldCheck, Truck, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Navigation } from "@/components/Navigation";
 import { ShoppingCart } from "@/components/ShoppingCart";
@@ -16,6 +17,9 @@ import { useState } from "react";
 import { getProductById, products as allProducts } from "@/lib/products";
 import { useEffect } from "react";
 import { useWishlist } from "@/contexts/WishlistContext";
+import { addRecentlyViewed } from "@/lib/recentlyViewed";
+import { RecentlyViewed } from "@/components/RecentlyViewed";
+import { formatINR } from "@/lib/utils";
 
 // Shared products data
 
@@ -41,6 +45,11 @@ export const ProductDetail = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [id]);
+
+  // Track recently viewed
+  useEffect(() => {
+    if (product) addRecentlyViewed(product.id);
+  }, [product]);
 
   const [selectedSize, setSelectedSize] = useState("M");
   const [quantity, setQuantity] = useState(1);
@@ -123,7 +132,7 @@ export const ProductDetail = () => {
         </Button>
 
         <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-start">
-          {/* Modern Product Image Carousel */}
+          {/* Modern Product Image Carousel with Lightbox */}
           <div className="flex flex-col items-center justify-center">
             <Card className="overflow-hidden bg-secondary border-border w-full">
               <div className="aspect-square relative flex items-center justify-center">
@@ -137,12 +146,33 @@ export const ProductDetail = () => {
                   <Minus className="h-5 w-5" />
                 </button>
                 {/* Main Image */}
-                <img
-                  src={productImages[sliderIndex]}
-                  alt={product.name}
-                  className="w-full h-full object-cover rounded-lg max-h-96 max-w-96 transition-all duration-300"
-                  draggable="false"
-                />
+                <Dialog>
+                  <img
+                    src={productImages[sliderIndex]}
+                    alt={product.name}
+                    className="w-full h-full object-cover rounded-lg max-h-96 max-w-96 transition-all duration-300 cursor-zoom-in"
+                    draggable="false"
+                    onClick={(e) => {
+                      (e.currentTarget.nextSibling as HTMLElement)?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+                    }}
+                  />
+                  <button className="hidden" aria-hidden="true" aria-label="Open image lightbox" title="Open image lightbox" type="button" />
+                  <DialogContent className="max-w-3xl">
+                    <DialogHeader>
+                      <DialogTitle>{product.name}</DialogTitle>
+                    </DialogHeader>
+                    <div className="flex flex-col gap-4">
+                      <img src={productImages[sliderIndex]} alt={product.name} className="w-full h-auto object-contain" />
+                      <div className="flex gap-2 overflow-x-auto">
+                        {productImages.map((img, idx) => (
+                          <button key={idx} className={`h-16 w-16 rounded border ${sliderIndex === idx ? 'border-primary' : 'border-border'}`} onClick={() => setSliderIndex(idx)}>
+                            <img src={img} alt={`Image ${idx + 1}`} className="w-full h-full object-cover" />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
                 {/* Next Button */}
                 <button
                   className="absolute right-2 top-1/2 -translate-y-1/2 bg-background/80 rounded-full p-2 shadow hover:bg-background"
@@ -185,18 +215,34 @@ export const ProductDetail = () => {
                 {product.discount ? (
                   <>
                     <span className="text-3xl font-bold text-primary">
-                      RS. {Math.round(product.price * (1 - product.discount / 100))}.00
+                      {formatINR(Math.round(product.price * (1 - product.discount / 100)))}
                     </span>
                     <span className="text-xl text-muted-foreground line-through">
-                      RS. {product.price}.00
+                      {formatINR(product.price)}
                     </span>
                     <Badge className="ml-2 bg-green-600 text-white">{product.discount}% OFF</Badge>
                   </>
                 ) : (
                   <span className="text-3xl font-bold text-primary">
-                    RS. {product.price}.00
+                    {formatINR(product.price)}
                   </span>
                 )}
+              </div>
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                {typeof product.stock === 'number' && (
+                  product.stock > 0 ? (
+                    <Badge className={product.stock <= 3 ? 'bg-amber-600 text-white' : 'bg-emerald-600 text-white'}>
+                      {product.stock <= 3 ? `Only ${product.stock} left` : `In Stock (${product.stock})`}
+                    </Badge>
+                  ) : (
+                    <Badge className="bg-gray-500 text-white">Out of Stock</Badge>
+                  )
+                )}
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <span className="flex items-center gap-1"><ShieldCheck className="h-4 w-4" /> Secure checkout</span>
+                  <span className="flex items-center gap-1"><Truck className="h-4 w-4" /> Fast shipping</span>
+                  <span className="flex items-center gap-1"><CreditCard className="h-4 w-4" /> Easy returns</span>
+                </div>
               </div>
               {/* Rating and reviews */}
               <div className="flex items-center gap-2 mt-2">
@@ -345,6 +391,9 @@ export const ProductDetail = () => {
             </div>
           </div>
         </div>
+
+        {/* Recently Viewed */}
+        <RecentlyViewed excludeId={product.id} />
 
         {/* Reviews Section */}
         <ReviewsSection

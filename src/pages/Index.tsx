@@ -15,6 +15,7 @@ import { DiscountPopup } from "@/components/DiscountPopup";
 import { useState } from "react";
 import { useWishlist } from "@/contexts/WishlistContext";
 import { Product } from "@/components/ProductCard";
+import { RecentlyViewed } from "@/components/RecentlyViewed";
 
 const Index = () => {
   const {
@@ -77,6 +78,7 @@ const Index = () => {
       <main>
         <Hero />
         <ProductCollection onAddToCart={handleAddToCart} />
+        <RecentlyViewed />
         {wishlistIds.length > 0 && (
           <section className="py-12 px-4">
             <div className="container mx-auto">

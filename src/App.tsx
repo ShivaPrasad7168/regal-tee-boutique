@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CartProvider } from "@/contexts/CartContext";
 import { WishlistProvider } from "@/contexts/WishlistContext";
+import { CompareProvider } from "@/contexts/CompareContext";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { ProductDetail } from "./pages/ProductDetail";
@@ -17,6 +18,7 @@ import { Shipping } from "./pages/Shipping";
 import { Privacy } from "./pages/Privacy";
 import { Terms } from "./pages/Terms";
 import Wishlist from "./pages/Wishlist";
+import Compare from "./pages/Compare";
 
 const queryClient = new QueryClient();
 
@@ -35,7 +37,8 @@ const App = () => {
             <BrowserRouter>
               <CartProvider>
                 <WishlistProvider>
-                  <Routes>
+                  <CompareProvider>
+                    <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/product/:id" element={<ProductDetail />} />
                   <Route path="/about" element={<About />} />
@@ -45,9 +48,11 @@ const App = () => {
                   <Route path="/privacy" element={<Privacy />} />
                   <Route path="/terms" element={<Terms />} />
                   <Route path="/wishlist" element={<Wishlist />} />
+                  <Route path="/compare" element={<Compare />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
-                  </Routes>
+                    </Routes>
+                  </CompareProvider>
                 </WishlistProvider>
               </CartProvider>
             </BrowserRouter>

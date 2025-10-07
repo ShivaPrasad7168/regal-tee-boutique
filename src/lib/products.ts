@@ -17,6 +17,8 @@ export const products: Product[] = [
     isNew: true,
     rating: 4.8,
     reviewCount: 234,
+    stock: 3,
+    specs: { Fabric: "Poly-Cotton 180 GSM", Fit: "Regular", Color: "Black/Gold" },
   },
   {
     id: "2",
@@ -30,6 +32,8 @@ export const products: Product[] = [
     rating: 4.6,
     reviewCount: 156,
     discount: 20,
+    stock: 12,
+    specs: { Fabric: "Cotton", Fit: "Slim", Color: "White" },
   },
   {
     id: "3",
@@ -43,6 +47,8 @@ export const products: Product[] = [
     isNew: true,
     rating: 4.9,
     reviewCount: 189,
+    stock: 0,
+    specs: { Fabric: "Polyester", Fit: "Athletic", Color: "Charcoal" },
   },
   {
     id: "4",
@@ -55,6 +61,8 @@ export const products: Product[] = [
     category: "Limited",
     rating: 5.0,
     reviewCount: 98,
+    stock: 5,
+    specs: { Fabric: "Poly-Cotton", Fit: "Regular", Color: "Navy/Gold" },
   },
   {
     id: "5",
@@ -68,6 +76,8 @@ export const products: Product[] = [
     rating: 4.7,
     reviewCount: 167,
     discount: 15,
+    stock: 9,
+    specs: { Fabric: "Cotton", Fit: "Regular", Color: "Red/Gold" },
   },
   {
     id: "6",
@@ -80,6 +90,8 @@ export const products: Product[] = [
     category: "Essential",
     rating: 4.5,
     reviewCount: 143,
+    stock: 20,
+    specs: { Fabric: "Cotton", Fit: "Regular", Color: "Black" },
   },
 ];
 

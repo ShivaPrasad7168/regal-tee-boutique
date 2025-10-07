@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ShoppingCart, Heart, Star, Ruler } from "lucide-react";
+import { ShoppingCart, Heart, Star, Ruler, Scale } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useWishlist } from "@/contexts/WishlistContext";
+import { useCompare } from "@/contexts/CompareContext";
+import { formatINR } from "@/lib/utils";
 
 export interface Product {
   id: string; // uuid
@@ -20,6 +22,8 @@ export interface Product {
   rating?: number;
   reviewCount?: number;
   isNew?: boolean;
+  stock?: number; // number of items in stock
+  specs?: Record<string, string>; // key-value product specifications
 }
 
 interface ProductCardProps {
@@ -31,7 +35,9 @@ export const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
   const navigate = useNavigate();
   const [isHovered, setIsHovered] = useState(false);
   const { isInWishlist, toggleWishlist } = useWishlist();
+  const { isInCompare, toggleCompare } = useCompare();
   const isFavorite = isInWishlist(product.id);
+  const isCompared = isInCompare(product.id);
 
   return (
     <Card
@@ -90,6 +96,17 @@ export const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
               onClick={() => toggleWishlist(product)}
             >
               <Heart className={`h-5 w-5 ${isFavorite ? "fill-current" : ""}`} />
+            </Button>
+            <Button
+              size="icon"
+              variant="outline"
+              className={`bg-background/90 hover:bg-background ${
+                isCompared ? "text-primary" : ""
+              }`}
+              onClick={() => toggleCompare(product)}
+              title="Compare"
+            >
+              <Scale className="h-5 w-5" />
             </Button>
             <Dialog>
               <DialogTrigger asChild>
@@ -157,16 +174,16 @@ export const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
               {product.discount ? (
                 <>
                   <span className="text-sm text-muted-foreground line-through">
-                    ${product.price}
+                    {formatINR(product.price)}
                   </span>
                   <span className="text-2xl font-bold text-gradient">
-                    ${Math.round(product.price * (1 - product.discount / 100))}
+                    {formatINR(Math.round(product.price * (1 - product.discount / 100)))}
                   </span>
                     <span className="ml-2 text-xs text-primary">-{product.discount}%</span>
                 </>
               ) : (
                 <span className="text-2xl font-bold text-gradient">
-                  ${product.price}
+                  {formatINR(product.price)}
                 </span>
               )}
             </div>
