@@ -58,7 +58,8 @@ export const ReferralPaymentPopup = ({ isOpen, onClose, totalAmount }: PaymentPo
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto border-primary/20 bg-card shadow-[0_0_50px_rgba(255,204,0,0.15)]">
+      <DialogContent className="sm:max-w-lg max-h-[90vh] border-primary/20 bg-card shadow-[0_0_50px_rgba(255,204,0,0.15)] flex flex-col overflow-hidden">
+        <div className="overflow-y-auto scrollbar-hide flex-1 pr-2">
         <DialogHeader>
           <DialogTitle className="text-2xl text-gradient">Complete Your Purchase</DialogTitle>
           <DialogDescription>
@@ -160,6 +161,7 @@ export const ReferralPaymentPopup = ({ isOpen, onClose, totalAmount }: PaymentPo
               ? `Pay Advance ₹${advanceAmount || 0}` 
               : `Pay ₹${totalAmount}`}
           </Button>
+        </div>
         </div>
       </DialogContent>
     </Dialog>

@@ -31,7 +31,7 @@ export const ShoppingCart = ({
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent className="w-full sm:max-w-lg bg-card">
+      <SheetContent className="w-full sm:max-w-lg bg-card flex flex-col overflow-hidden">
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
             <ShoppingBag className="h-5 w-5 text-primary" />
@@ -48,9 +48,9 @@ export const ShoppingCart = ({
             </Button>
           </div>
         ) : (
-          <div className="flex flex-col h-full mt-6">
+          <div className="flex flex-col flex-1 mt-6 overflow-hidden">
             {/* Cart Items */}
-            <div className="flex-1 overflow-y-auto space-y-4 pr-2">
+            <div className="flex-1 overflow-y-auto space-y-4 pr-2 scrollbar-hide">
               {items.map((item) => (
                 <div
                   key={item.id}
@@ -112,7 +112,7 @@ export const ShoppingCart = ({
             </div>
 
             {/* Cart Summary */}
-            <div className="border-t border-border pt-4 space-y-4 mt-6">
+            <div className="border-t border-border pt-4 space-y-4 mt-6 flex-shrink-0">
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Subtotal</span>
