@@ -103,7 +103,7 @@ export const ShoppingCart = ({
                         </Button>
                       </div>
                       <span className="font-bold text-gradient">
-                        ${item.price * item.quantity}
+                        ₹{item.price * item.quantity}
                       </span>
                     </div>
                   </div>
@@ -116,16 +116,16 @@ export const ShoppingCart = ({
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Subtotal</span>
-                  <span className="font-medium">${subtotal}</span>
+                  <span className="font-medium">₹{subtotal}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Shipping</span>
-                  <span className="font-medium">${shipping}</span>
+                  <span className="font-medium">₹{shipping}</span>
                 </div>
                 <Separator />
                 <div className="flex justify-between text-lg font-bold">
                   <span>Total</span>
-                  <span className="text-gradient">${total}</span>
+                  <span className="text-gradient">₹{total}</span>
                 </div>
               </div>
               <Button variant="luxury" size="lg" className="w-full" onClick={onCheckout}>

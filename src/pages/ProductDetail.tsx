@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { Navigation } from "@/components/Navigation";
 import { ShoppingCart } from "@/components/ShoppingCart";
 import { SignupLoginPopup } from "@/components/SignupLoginPopup";
+import { ReferralPaymentPopup } from "@/components/ReferralPaymentPopup";
 import { Footer } from "@/components/Footer";
 import { SizeGuide } from "@/components/SizeGuide";
 import { ReviewsSection } from "@/components/ReviewsSection";
@@ -57,6 +58,7 @@ export const ProductDetail = () => {
   const [selectedColor, setSelectedColor] = useState("green");
   const isFavorite = product ? isInWishlist(product.id) : false;
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
+  const [paymentOpen, setPaymentOpen] = useState(false);
   const [carouselApi, setCarouselApi] = useState<CarouselApi | undefined>();
   const [selectedSlide, setSelectedSlide] = useState(0);
   // Use product.images for carousel
@@ -109,13 +111,33 @@ export const ProductDetail = () => {
   };
 
   const handleBuyNow = () => {
-    addToCart(product);
-    if (isLoggedIn) {
-      toast.success("Proceeding to checkout...");
-      navigate("/");
-      setTimeout(() => setCartOpen(true), 500);
+    if (!isLoggedIn) {
+      setLoginOpen(true);
+      return;
     }
+    setPaymentOpen(true);
   };
+
+  const handleCheckout = () => {
+    if (!isLoggedIn) {
+      setLoginOpen(true);
+      return;
+    }
+    setCartOpen(false);
+    setPaymentOpen(true);
+  };
+
+  const handleRemoveItem = (productId: string) => {
+    removeItem(productId);
+    toast.success("Removed from cart");
+  };
+
+  const totalAmount = cartItems.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
+
+  const buyNowTotal = product ? product.price * quantity : 0;
 
   const bulletPoints = [
     "Fabric: Premium Poly-Cotton blend - soft, breathable & wrinkle resistant",
@@ -462,7 +484,7 @@ export const ProductDetail = () => {
                     {relatedProduct.name}
                   </p>
                   <p className="text-sm text-primary font-bold mt-1">
-                    RS. {relatedProduct.price}.00
+                    {formatINR(relatedProduct.price)}
                   </p>
                 </div>
               </Card>
@@ -479,17 +501,20 @@ export const ProductDetail = () => {
         onClose={() => setCartOpen(false)}
         items={cartItems}
         onUpdateQuantity={updateQuantity}
-        onRemoveItem={removeItem}
-        onCheckout={() => {
-          setCartOpen(false);
-          navigate("/");
-        }}
+        onRemoveItem={handleRemoveItem}
+        onCheckout={handleCheckout}
       />
 
       <SignupLoginPopup
         isOpen={loginOpen}
         onClose={() => setLoginOpen(false)}
         onSuccess={() => setIsLoggedIn(true)}
+      />
+
+      <ReferralPaymentPopup
+        isOpen={paymentOpen}
+        onClose={() => setPaymentOpen(false)}
+        totalAmount={paymentOpen && cartItems.length === 0 ? buyNowTotal : totalAmount}
       />
 
       <SizeGuide isOpen={sizeGuideOpen} onClose={() => setSizeGuideOpen(false)} />
