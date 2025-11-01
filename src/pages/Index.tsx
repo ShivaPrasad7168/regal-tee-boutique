@@ -11,7 +11,7 @@ import { SocialProofPopup } from "@/components/SocialProofPopup";
 import AnimatedLogo from "@/components/AnimatedLogo";
 import { SignupLoginPopup } from "@/components/SignupLoginPopup";
 import { ReferralPaymentPopup } from "@/components/ReferralPaymentPopup";
-import { DiscountPopup } from "@/components/DiscountPopup";
+
 import { useState } from "react";
 import { useWishlist } from "@/contexts/WishlistContext";
 import { Product } from "@/components/ProductCard";
@@ -122,7 +122,7 @@ const Index = () => {
       />
 
       <SocialProofPopup />
-      <DiscountPopup />
+      
     </div>
   );
 };

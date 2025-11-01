@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ShoppingCart, Search, Menu, X, User, LogIn, UserPlus, Globe, Heart } from "lucide-react";
+import { ShoppingBag, Search, Menu, X, User, LogIn, UserPlus, Globe, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -106,7 +106,7 @@ export const Navigation = ({ cartItemsCount = 0, onCartClick, wishlistCount = 0 
                 className="relative h-9 w-9"
                 onClick={onCartClick}
               >
-                <ShoppingCart className="h-4 w-4" />
+                <ShoppingBag className="h-4 w-4" />
                 {cartItemsCount > 0 && (
                   <Badge className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center p-0 text-[10px] bg-primary text-primary-foreground">
                     {cartItemsCount}
