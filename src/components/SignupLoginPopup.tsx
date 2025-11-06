@@ -71,7 +71,25 @@ export const SignupLoginPopup = ({ isOpen, onClose, onSuccess }: SignupLoginPopu
         password: signinPassword,
       });
 
-      if (error) throw error;
+      if (error) {
+        // Check if it's an invalid credentials error
+        if (error.message.includes('Invalid login credentials') || error.message.includes('Email not confirmed')) {
+          toast.error('Account not found. Please sign up first.', {
+            action: {
+              label: 'Sign Up',
+              onClick: () => {
+                // Switch to signup tab
+                const signupTab = document.querySelector('[value="signup"]') as HTMLButtonElement;
+                signupTab?.click();
+              }
+            }
+          });
+        } else {
+          throw error;
+        }
+        setIsLoading(false);
+        return;
+      }
       
       toast.success('Signed in successfully!');
       onSuccess();

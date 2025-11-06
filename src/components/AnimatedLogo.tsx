@@ -16,7 +16,7 @@ const IntroAnimation = ({ onComplete }: { onComplete: () => void }) => {
 
   return (
     <div
-      className={`fixed inset-0 z-[100] bg-background flex items-center justify-center transition-opacity duration-500 ${
+      className={`fixed inset-0 z-[100] bg-black flex items-center justify-center transition-opacity duration-500 ${
         isVisible ? "opacity-100" : "opacity-0"
       }`}
     >
@@ -24,7 +24,7 @@ const IntroAnimation = ({ onComplete }: { onComplete: () => void }) => {
         <img
           src={logo}
           alt="ONYXIA Logo"
-          className="h-40 w-40 mx-auto mb-6 rounded-full object-cover shadow-gold animate-glow"
+          className="h-40 w-40 mx-auto mb-6 rounded-full object-cover"
         />
         <h1 className="text-4xl md:text-5xl font-cinzel font-bold text-gradient-gold mb-2">
           ONYXIA
