@@ -235,7 +235,7 @@ export const SignupLoginPopup = ({ isOpen, onClose, onSuccess }: SignupLoginPopu
         setShowReset(false);
       }
     }}>
-      <DialogContent className="sm:max-w-md border-border/50 bg-card/95 backdrop-blur-xl shadow-2xl animate-in fade-in-0 zoom-in-95 duration-300">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto border-border/50 bg-card/95 backdrop-blur-xl shadow-2xl animate-in fade-in-0 zoom-in-95 duration-300">
         <DialogHeader className="space-y-3">
           <DialogTitle className="text-3xl font-bold text-center bg-gradient-to-r from-primary via-yellow-400 to-primary bg-clip-text text-transparent">
             Welcome to ONYXIA
