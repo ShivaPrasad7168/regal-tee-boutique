@@ -21,11 +21,16 @@ import { useEffect } from "react";
 import { useWishlist } from "@/contexts/WishlistContext";
 import { addRecentlyViewed } from "@/lib/recentlyViewed";
 import { RecentlyViewed } from "@/components/RecentlyViewed";
+import { supabase } from "@/integrations/supabase/client"; // ✅ Added
+
 import { formatINR } from "@/lib/utils";
 
 // Shared products data
-
-export const ProductDetail = () => {
+interface ProductDetailProps {
+  user?: any; // user from Supabase
+  openAuthPopup?: () => void; 
+}
+export const ProductDetail = ({ user, openAuthPopup }: ProductDetailProps) => {
   const {
     cartItems,
     addToCart,
@@ -110,22 +115,34 @@ export const ProductDetail = () => {
     }
   };
 
-  const handleBuyNow = () => {
-    if (!isLoggedIn) {
-      setLoginOpen(true);
+  const handleBuyNow = async () => {
+    const { data, error } = await supabase.auth.getUser();
+  
+    if (error || !data.user) {
+      toast.error("Please sign in to continue your purchase");
+      setLoginOpen(true); // ✅ opens your local popup
       return;
     }
-    setPaymentOpen(true);
+  
+    setIsLoggedIn(true); // ✅ mark as logged in for local context
+    setPaymentOpen(true); // ✅ continue to payment popup
   };
+  
 
-  const handleCheckout = () => {
-    if (!isLoggedIn) {
-      setLoginOpen(true);
+  const handleCheckout = async () => {
+    const { data, error } = await supabase.auth.getUser();
+  
+    if (error || !data.user) {
+      toast.error("Please sign in to continue checkout");
+      setLoginOpen(true); // ✅ opens popup
       return;
     }
+  
+    setIsLoggedIn(true);
     setCartOpen(false);
     setPaymentOpen(true);
   };
+  
 
   const handleRemoveItem = (productId: string) => {
     removeItem(productId);

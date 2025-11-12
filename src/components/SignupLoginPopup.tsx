@@ -41,7 +41,9 @@ export const SignupLoginPopup = ({ isOpen, onClose, onSuccess }: SignupLoginPopu
   };
 
   const validatePassword = (password: string): boolean => {
-    return password.length >= 6;
+    // At least 8 characters, 1 uppercase, 1 lowercase, 1 number, 1 special symbol
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return passwordRegex.test(password);
   };
 
   const clearAllForms = () => {
@@ -157,7 +159,7 @@ export const SignupLoginPopup = ({ isOpen, onClose, onSuccess }: SignupLoginPopu
     }
 
     if (!validatePassword(signupPassword)) {
-      toast.error('Password must be at least 6 characters long');
+      toast.error('Password must be at least 8 characters with 1 uppercase, 1 lowercase, 1 number, and 1 special symbol');
       return;
     }
 
@@ -178,10 +180,28 @@ export const SignupLoginPopup = ({ isOpen, onClose, onSuccess }: SignupLoginPopu
       if (error) throw error;
       
       if (data.user) {
+        // Fallback: manually create profile if trigger fails
+        try {
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .upsert({
+              user_id: data.user.id,
+              name: signupName,
+              phone: signupPhone || null,
+            });
+
+          if (profileError) {
+            console.error('Profile creation failed:', profileError);
+            // Don't throw, just log - user is still created
+          }
+        } catch (profileErr) {
+          console.error('Profile creation error:', profileErr);
+        }
+
         toast.success('Account created successfully!', {
           description: 'Welcome to ONYXIA'
         });
-        
+
         clearAllForms();
         onSuccess();
         onClose();
@@ -444,7 +464,7 @@ export const SignupLoginPopup = ({ isOpen, onClose, onSuccess }: SignupLoginPopu
                 
                 <div className="space-y-2">
                   <Label htmlFor="signup-password" className="text-sm font-medium">
-                    Password <span className="text-muted-foreground text-xs">(Min. 6 characters)</span>
+                    Password <span className="text-muted-foreground text-xs">(Min. 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special)</span>
                   </Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
