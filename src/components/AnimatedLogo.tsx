@@ -26,12 +26,7 @@ const IntroAnimation = ({ onComplete }: { onComplete: () => void }) => {
           alt="ONYXIA Logo"
           className="h-40 w-40 mx-auto mb-6 rounded-full object-cover"
         />
-        <h1 className="text-4xl md:text-5xl font-cinzel font-bold text-gradient-gold mb-2">
-          ONYXIA
-        </h1>
-        <p className="text-foreground/80 text-sm tracking-[0.3em] uppercase">
-          Luxury Fashion
-        </p>
+
       </div>
     </div>
   );
