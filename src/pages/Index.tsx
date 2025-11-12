@@ -16,6 +16,7 @@ import { useState } from "react";
 import { useWishlist } from "@/contexts/WishlistContext";
 import { Product } from "@/components/ProductCard";
 import { RecentlyViewed } from "@/components/RecentlyViewed";
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
   const {
@@ -34,23 +35,37 @@ const Index = () => {
   const { toast } = useToast();
   const { wishlistIds } = useWishlist();
 
-  const handleCheckout = () => {
-    if (!isLoggedIn) {
+  const handleCheckout = async () => {
+    const { data, error } = await supabase.auth.getUser();
+    
+    if (error || !data.user) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to continue checkout",
+      });
       setLoginOpen(true);
       return;
     }
+    
+    setIsLoggedIn(true);
     setCartOpen(false);
     setPaymentOpen(true);
   };
 
-  const handleAddToCart = (product: Product) => {
-    addToCart(product);
-    if (isLoggedIn) {
-      toast({
-        title: "Added to cart",
-        description: `${product.name} has been added to your cart.`,
-      });
+  const handleAddToCart = async (product: Product) => {
+    const { data } = await supabase.auth.getUser();
+    
+    if (!data.user) {
+      setLoginOpen(true);
+      return;
     }
+    
+    addToCart(product);
+    setIsLoggedIn(true);
+    toast({
+      title: "Added to cart",
+      description: `${product.name} has been added to your cart.`,
+    });
   };
 
   const handleRemoveItem = (productId: string) => {

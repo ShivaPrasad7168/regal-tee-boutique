@@ -80,8 +80,7 @@ const App = () => {
                 <WishlistProvider>
                   <CompareProvider>
                     <Routes>
-                      {/* Pass user or openAuth prop if needed. Example below */}
-                      <Route path="/" element={<Index user={user} openAuthPopup={() => setAuthPopupOpen(true)} />} />
+                      <Route path="/" element={<Index />} />
                       <Route path="/product/:id" element={<ProductDetail user={user} openAuthPopup={() => setAuthPopupOpen(true)} />} />
                       <Route path="/about" element={<About />} />
                       <Route path="/contact" element={<Contact />} />
