@@ -6,12 +6,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { User, Package, MapPin, LogOut } from "lucide-react";
+import { User, Package, MapPin, LogOut, Truck, CheckCircle2, Clock } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useWishlist } from "@/contexts/WishlistContext";
+import { getOrderHistory } from "@/services/paymentService";
 
 export const Profile = () => {
   const navigate = useNavigate();
@@ -29,6 +31,7 @@ export const Profile = () => {
     state: "",
     pincode: "",
   });
+  const [orders, setOrders] = useState<any[]>([]);
 
   useEffect(() => {
     checkUser();
@@ -60,7 +63,39 @@ export const Profile = () => {
       });
     }
 
+    // Fetch order history
+    const orderHistory = await getOrderHistory();
+    setOrders(orderHistory);
+
     setLoading(false);
+  };
+
+  const getStatusBadge = (status: string) => {
+    const statusConfig = {
+      pending: { label: "Pending", variant: "secondary" as const, icon: Clock },
+      confirmed: { label: "Confirmed", variant: "default" as const, icon: CheckCircle2 },
+      shipped: { label: "Shipped", variant: "default" as const, icon: Truck },
+      delivered: { label: "Delivered", variant: "default" as const, icon: CheckCircle2 },
+      failed: { label: "Failed", variant: "destructive" as const, icon: Clock },
+    };
+
+    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pending;
+    const Icon = config.icon;
+
+    return (
+      <Badge variant={config.variant} className="gap-1">
+        <Icon className="h-3 w-3" />
+        {config.label}
+      </Badge>
+    );
+  };
+
+  const getEstimatedDelivery = (orderDate: string, status: string) => {
+    if (status === 'delivered') return 'Delivered';
+    
+    const date = new Date(orderDate);
+    date.setDate(date.getDate() + 7); // 7 days delivery
+    return `Est. ${date.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}`;
   };
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
@@ -184,20 +219,85 @@ export const Profile = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Order History</CardTitle>
-                <CardDescription>View your past orders</CardDescription>
+                <CardDescription>Track your orders and view delivery status</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  <Package className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>No orders yet</p>
-                  <Button 
-                    variant="link" 
-                    onClick={() => navigate("/")}
-                    className="mt-2"
-                  >
-                    Start Shopping
-                  </Button>
-                </div>
+                {orders.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Package className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No orders yet</p>
+                    <Button 
+                      variant="link" 
+                      onClick={() => navigate("/")}
+                      className="mt-2"
+                    >
+                      Start Shopping
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {orders.map((order) => (
+                      <div 
+                        key={order.id} 
+                        className="border border-border rounded-lg p-4 hover:border-primary/50 transition-colors"
+                      >
+                        <div className="flex items-start justify-between mb-3">
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <p className="font-semibold">Order #{order.id.slice(0, 8)}</p>
+                              {getStatusBadge(order.status)}
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                              Placed on {new Date(order.created_at).toLocaleDateString('en-IN', { 
+                                year: 'numeric', 
+                                month: 'long', 
+                                day: 'numeric' 
+                              })}
+                            </p>
+                          </div>
+                          <p className="text-lg font-bold">₹{order.total_amount}</p>
+                        </div>
+
+                        {/* Order Items */}
+                        <div className="space-y-2 mb-3">
+                          {order.order_items?.map((item: any) => (
+                            <div key={item.id} className="flex items-center gap-3 text-sm">
+                              <div className="w-12 h-12 bg-muted rounded flex items-center justify-center">
+                                <Package className="h-6 w-6 text-muted-foreground" />
+                              </div>
+                              <div className="flex-1">
+                                <p className="font-medium">{item.products?.name || 'Product'}</p>
+                                <p className="text-muted-foreground">Qty: {item.quantity}</p>
+                              </div>
+                              <p className="font-semibold">₹{item.price}</p>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Shipping Info */}
+                        <div className="flex items-center justify-between pt-3 border-t border-border">
+                          <div className="flex items-center gap-2 text-sm">
+                            <Truck className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-muted-foreground">
+                              {getEstimatedDelivery(order.created_at, order.status)}
+                            </span>
+                          </div>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => {
+                              toast.info("Order details", {
+                                description: `Shipping to: ${order.shipping_address}`
+                              });
+                            }}
+                          >
+                            View Details
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

@@ -97,7 +97,7 @@ export const ReferralPaymentPopup = ({ isOpen, onClose, totalAmount }: PaymentPo
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] border-border bg-card flex flex-col overflow-hidden">
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] border-border bg-card flex flex-col overflow-hidden p-8">
         <div className="overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] flex-1 pr-2">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold">DELIVERY DETAILS</DialogTitle>
