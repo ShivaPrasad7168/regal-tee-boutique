@@ -84,69 +84,64 @@ Deno.serve(async (req) => {
       throw itemsError;
     }
 
-    // Gokwik Payment Gateway Integration
-    const GOKWIK_API_URL = 'https://api.gokwik.co/v1';
-    const GOKWIK_API_KEY = Deno.env.get('GOKWIK_API_KEY')!;
-    const GOKWIK_MERCHANT_ID = Deno.env.get('GOKWIK_MERCHANT_ID')!;
+    // Razorpay Payment Gateway Integration
+    const RAZORPAY_API_URL = 'https://api.razorpay.com/v1';
+    const RAZORPAY_KEY_ID = Deno.env.get('RAZORPAY_KEY_ID')!;
+    const RAZORPAY_KEY_SECRET = Deno.env.get('RAZORPAY_KEY_SECRET')!;
 
-    if (!GOKWIK_API_KEY || !GOKWIK_MERCHANT_ID) {
-      throw new Error('Gokwik API credentials not configured');
+    if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) {
+      throw new Error('Razorpay API credentials not configured');
     }
 
-    // Prepare Gokwik payment request
-    const gokwikPayload = {
-      merchant_id: GOKWIK_MERCHANT_ID,
-      order_id: order.id,
-      amount: paymentData.amount,
+    // Prepare Razorpay order request
+    const razorpayPayload = {
+      amount: Math.round(paymentData.amount * 100), // Convert to paisa
       currency: paymentData.currency || 'INR',
-      customer: {
-        name: paymentData.customerName,
-        email: paymentData.customerEmail,
-        phone: paymentData.customerPhone,
+      receipt: order.id,
+      notes: {
+        customer_name: paymentData.customerName,
+        customer_email: paymentData.customerEmail,
+        customer_phone: paymentData.customerPhone,
+        shipping_address: paymentData.shippingAddress,
       },
-      items: paymentData.items.map(item => ({
-        id: item.productId,
-        name: `Product ${item.productId}`,
-        quantity: item.quantity,
-        price: item.price,
-      })),
-      shipping_address: paymentData.shippingAddress,
-      redirect_url: `${Deno.env.get('SITE_URL') || 'http://localhost:3000'}/payment/success`,
-      webhook_url: `${Deno.env.get('SUPABASE_URL')}/functions/v1/gokwik-webhook`,
     };
 
-    // Create payment with Gokwik
-    const gokwikResponse = await fetch(`${GOKWIK_API_URL}/payments/create`, {
+    // Create order with Razorpay
+    const auth = btoa(`${RAZORPAY_KEY_ID}:${RAZORPAY_KEY_SECRET}`);
+    const razorpayResponse = await fetch(`${RAZORPAY_API_URL}/orders`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${GOKWIK_API_KEY}`,
+        'Authorization': `Basic ${auth}`,
       },
-      body: JSON.stringify(gokwikPayload),
+      body: JSON.stringify(razorpayPayload),
     });
 
-    if (!gokwikResponse.ok) {
-      const errorData = await gokwikResponse.text();
-      console.error('Gokwik API error:', errorData);
-      throw new Error('Failed to create payment with Gokwik');
+    if (!razorpayResponse.ok) {
+      const errorData = await razorpayResponse.text();
+      console.error('Razorpay API error:', errorData);
+      throw new Error('Failed to create order with Razorpay');
     }
 
-    const gokwikData = await gokwikResponse.json();
+    const razorpayData = await razorpayResponse.json();
 
-    // Update order with Gokwik payment details
+    // Update order with Razorpay order details
     await supabase
       .from('orders')
       .update({
-        payment_id: gokwikData.payment_id,
-        payment_gateway_data: gokwikData,
+        payment_id: razorpayData.id,
+        payment_gateway: 'razorpay',
+        payment_gateway_data: razorpayData,
       })
       .eq('id', order.id);
 
     const response = {
       success: true,
-      paymentUrl: gokwikData.payment_url,
       orderId: order.id,
-      paymentId: gokwikData.payment_id,
+      razorpayOrderId: razorpayData.id,
+      amount: razorpayData.amount,
+      currency: razorpayData.currency,
+      key: RAZORPAY_KEY_ID, // Public key for frontend
       message: 'Payment initiated successfully',
     };
 

@@ -24,7 +24,7 @@ export interface PaymentResponse {
   error?: string;
 }
 
-export const initiateGokwikPayment = async (
+export const initiateRazorpayPayment = async (
   paymentData: PaymentRequest
 ): Promise<PaymentResponse> => {
   try {
@@ -59,6 +59,9 @@ export const initiateGokwikPayment = async (
     };
   }
 };
+
+// Keep the old function for backward compatibility
+export const initiateGokwikPayment = initiateRazorpayPayment;
 
 export const getOrderHistory = async () => {
   try {

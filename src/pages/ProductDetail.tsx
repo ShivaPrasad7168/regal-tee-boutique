@@ -60,7 +60,6 @@ export const ProductDetail = ({ user, openAuthPopup }: ProductDetailProps) => {
 
   const [selectedSize, setSelectedSize] = useState("M");
   const [quantity, setQuantity] = useState(1);
-  const [selectedColor, setSelectedColor] = useState("green");
   const isFavorite = product ? isInWishlist(product.id) : false;
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
   const [paymentOpen, setPaymentOpen] = useState(false);
@@ -102,11 +101,6 @@ export const ProductDetail = ({ user, openAuthPopup }: ProductDetailProps) => {
   }
 
   const sizes = ["S", "M", "L", "XL", "2XL"];
-  const colors = [
-    { name: "green", value: "bg-green-500" },
-    { name: "blue", value: "bg-blue-500" },
-    { name: "black", value: "bg-black" },
-  ];
 
   const handleAddToCart = () => {
     addToCart(product);
@@ -372,24 +366,7 @@ export const ProductDetail = ({ user, openAuthPopup }: ProductDetailProps) => {
               </div>
             </div>
 
-            {/* Color Selector */}
-            <div className="space-y-3">
-              <label className="text-sm font-medium">Color:</label>
-              <div className="flex gap-3">
-                {colors.map((color) => (
-                  <button
-                    key={color.name}
-                    className={`w-10 h-10 rounded-full ${color.value} border-2 ${
-                      selectedColor === color.name
-                        ? "border-primary ring-2 ring-primary/30"
-                        : "border-border"
-                    }`}
-                    onClick={() => setSelectedColor(color.name)}
-                    title={color.name}
-                  />
-                ))}
-              </div>
-            </div>
+
 
             {/* Quantity Selector */}
             <div className="space-y-3">

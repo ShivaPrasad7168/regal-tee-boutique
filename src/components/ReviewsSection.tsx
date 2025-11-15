@@ -1,17 +1,19 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Star } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Review {
   id: string;
-  author: string;
+  product_id: string;
+  user_id: string;
   rating: number;
-  date: string;
   comment: string;
-  verified: boolean;
+  created_at: string;
+  profiles?: { name: string };
 }
 
 interface ReviewsSectionProps {
@@ -24,40 +26,60 @@ export const ReviewsSection = ({ productId, averageRating, reviewCount }: Review
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock reviews data
-  const reviews: Review[] = [
-    {
-      id: "1",
-      author: "Sarah M.",
-      rating: 5,
-      date: "2025-01-15",
-      comment: "Absolutely love this shirt! The quality is outstanding and the fit is perfect. Worth every penny.",
-      verified: true
-    },
-    {
-      id: "2",
-      author: "Michael R.",
-      rating: 4,
-      date: "2025-01-10",
-      comment: "Great quality fabric and the design is unique. Sizing is accurate. Would recommend!",
-      verified: true
-    },
-    {
-      id: "3",
-      author: "Emma L.",
-      rating: 5,
-      date: "2025-01-05",
-      comment: "This is my third purchase from ONYXIA. Consistently excellent quality and the customer service is top-notch.",
-      verified: true
+  useEffect(() => {
+    fetchReviews();
+  }, [productId]);
+
+  const fetchReviews = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('reviews')
+        .select(`
+          *,
+          profiles:user_id (name)
+        `)
+        .eq('product_id', productId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setReviews(data || []);
+    } catch (error) {
+      console.error('Error fetching reviews:', error);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
-  const handleSubmitReview = () => {
-    toast.success("Thank you for your review!");
-    setShowReviewForm(false);
-    setComment("");
-    setRating(5);
+  const handleSubmitReview = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("Please sign in to leave a review");
+        return;
+      }
+
+      const { error } = await supabase
+        .from('reviews')
+        .insert([{
+          product_id: productId,
+          user_id: user.id,
+          rating,
+          comment
+        }]);
+
+      if (error) throw error;
+
+      toast.success("Review submitted successfully!");
+      setShowReviewForm(false);
+      setComment("");
+      setRating(5);
+      fetchReviews(); // Refresh reviews
+    } catch (error: any) {
+      toast.error(error.message || "Failed to submit review");
+    }
   };
 
   const renderStars = (count: number) => {
@@ -132,17 +154,15 @@ export const ReviewsSection = ({ productId, averageRating, reviewCount }: Review
             <div className="flex items-start justify-between mb-3">
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="font-semibold">{review.author}</span>
-                  {review.verified && (
-                    <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">
-                      Verified Purchase
-                    </span>
-                  )}
+                  <span className="font-semibold">{review.profiles?.name || 'Anonymous'}</span>
+                  <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">
+                    Verified Purchase
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="flex">{renderStars(review.rating)}</div>
                   <span className="text-sm text-muted-foreground">
-                    {new Date(review.date).toLocaleDateString()}
+                    {new Date(review.created_at).toLocaleDateString()}
                   </span>
                 </div>
               </div>

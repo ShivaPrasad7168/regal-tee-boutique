@@ -20,15 +20,15 @@ Deno.serve(async (req) => {
     
     console.log('Gokwik webhook received:', webhookData);
 
-    // Verify webhook signature for security
-    const signature = req.headers.get('X-Gokwik-Signature');
-    const GOKWIK_WEBHOOK_SECRET = Deno.env.get('GOKWIK_WEBHOOK_SECRET');
+    // Verify webhook signature for security (Razorpay)
+    const signature = req.headers.get('X-Razorpay-Signature');
+    const RAZORPAY_WEBHOOK_SECRET = Deno.env.get('RAZORPAY_WEBHOOK_SECRET');
 
-    if (GOKWIK_WEBHOOK_SECRET && signature) {
+    if (RAZORPAY_WEBHOOK_SECRET && signature) {
       const encoder = new TextEncoder();
       const data = encoder.encode(JSON.stringify(webhookData));
-      const keyData = encoder.encode(GOKWIK_WEBHOOK_SECRET);
-      
+      const keyData = encoder.encode(RAZORPAY_WEBHOOK_SECRET);
+
       const cryptoKey = await crypto.subtle.importKey(
         'raw',
         keyData,
@@ -36,7 +36,7 @@ Deno.serve(async (req) => {
         false,
         ['sign']
       );
-      
+
       const signatureBuffer = await crypto.subtle.sign('HMAC', cryptoKey, data);
       const expectedSignature = Array.from(new Uint8Array(signatureBuffer))
         .map(b => b.toString(16).padStart(2, '0'))
@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    const { order_id, payment_status, payment_id, transaction_id } = webhookData;
+    const { order_id, payment_status, payment_id, razorpay_payment_id } = webhookData;
 
     if (!order_id) {
       throw new Error('Missing order_id in webhook');
