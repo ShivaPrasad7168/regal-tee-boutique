@@ -1,20 +1,41 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ProductCard, Product } from "./ProductCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
 import { SlidersHorizontal, X } from "lucide-react";
-import { products } from "@/lib/products";
-
-// products imported
+import { supabase } from "@/lib/supabaseClient"; // 👈 create this file as shown
 
 interface ProductCollectionProps {
   onAddToCart: (product: Product) => void;
 }
 
+// Shape of a row in your `products` table
+type DbProduct = {
+  id: string;
+  name: string;
+  description: string | null;
+  price: number;
+  image_url: string | null;
+  category: string | null;
+  discount: number | null;
+  rating: number | null;
+  review_count: number | null;
+  is_new: boolean | null;
+  stock: number | null;
+  slug?: string | null;
+};
+
 export const ProductCollection = ({ onAddToCart }: ProductCollectionProps) => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [query, setQuery] = useState<string>("");
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 5000]);
@@ -22,6 +43,48 @@ export const ProductCollection = ({ onAddToCart }: ProductCollectionProps) => {
 
   const categories = ["signature", "essential", "limited"];
   const maxPrice = 5000;
+
+  // 🟢 Fetch products from Supabase
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .order("created_at", { ascending: false });
+        console.log("PRODUCTS DATA =>", data);
+        console.log("PRODUCTS ERROR =>", error);
+      if (error) {
+        console.error("Error loading products:", error);
+        setLoading(false);
+        return;
+      }
+
+      const mapped: Product[] = (data as DbProduct[]).map((row) => ({
+        id: row.id,
+        name: row.name,
+        description: row.description ?? "",
+        // if you add a slug column later, use that. for now fallback to category
+        slug: row.slug ?? row.category ?? "",
+        price: Number(row.price),
+        // IMPORTANT: in DB store like `/products/product-1.jpg`
+        image: row.image_url || "/products/placeholder.jpg",
+        category: row.category || "",
+        discount: row.discount ?? undefined,
+        rating: row.rating ?? undefined,
+        reviewCount: row.review_count ?? undefined,
+        isNew: row.is_new ?? false,
+        stock: row.stock ?? 0,
+        specs: {}, // extend later if you store specs in DB
+      }));
+
+      setProducts(mapped);
+      setLoading(false);
+    };
+
+    fetchProducts();
+  }, []);
 
   const toggleCategory = (category: string) => {
     setSelectedCategories((prev) =>
@@ -39,7 +102,8 @@ export const ProductCollection = ({ onAddToCart }: ProductCollectionProps) => {
   };
 
   const activeFiltersCount =
-    selectedCategories.length + (priceRange[0] > 0 || priceRange[1] < maxPrice ? 1 : 0);
+    selectedCategories.length +
+    (priceRange[0] > 0 || priceRange[1] < maxPrice ? 1 : 0);
 
   const filteredProducts = useMemo(() => {
     let result = [...products];
@@ -77,12 +141,11 @@ export const ProductCollection = ({ onAddToCart }: ProductCollectionProps) => {
         result.sort((a, b) => a.name.localeCompare(b.name));
         break;
       default:
-        // featured - keep original order
-        break;
+      // "featured" – keep DB order
     }
 
     return result;
-  }, [selectedCategories, query, priceRange, sortBy]);
+  }, [products, selectedCategories, query, priceRange, sortBy]);
 
   return (
     <section id="collection" className="py-20 px-4">
@@ -126,7 +189,10 @@ export const ProductCollection = ({ onAddToCart }: ProductCollectionProps) => {
                   )}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-80 bg-card border-border z-50" align="end">
+              <PopoverContent
+                className="w-80 bg-card border-border z-50"
+                align="end"
+              >
                 <div className="space-y-6">
                   {/* Header */}
                   <div className="flex items-center justify-between">
@@ -176,7 +242,9 @@ export const ProductCollection = ({ onAddToCart }: ProductCollectionProps) => {
                         max={maxPrice}
                         step={100}
                         value={priceRange}
-                        onValueChange={(value) => setPriceRange(value as [number, number])}
+                        onValueChange={(value) =>
+                          setPriceRange(value as [number, number])
+                        }
                         className="w-full"
                       />
                     </div>
@@ -198,7 +266,9 @@ export const ProductCollection = ({ onAddToCart }: ProductCollectionProps) => {
                       ].map((option) => (
                         <Badge
                           key={option.value}
-                          variant={sortBy === option.value ? "default" : "outline"}
+                          variant={
+                            sortBy === option.value ? "default" : "outline"
+                          }
                           className="cursor-pointer justify-center py-2 hover:bg-primary hover:text-primary-foreground transition-colors"
                           onClick={() => setSortBy(option.value)}
                         >
@@ -215,7 +285,9 @@ export const ProductCollection = ({ onAddToCart }: ProductCollectionProps) => {
           {/* Active Filters Display */}
           {activeFiltersCount > 0 && (
             <div className="flex flex-wrap items-center gap-2 mt-4">
-              <span className="text-sm text-muted-foreground">Active filters:</span>
+              <span className="text-sm text-muted-foreground">
+                Active filters:
+              </span>
               {selectedCategories.map((category) => (
                 <Badge
                   key={category}
@@ -237,22 +309,36 @@ export const ProductCollection = ({ onAddToCart }: ProductCollectionProps) => {
         </div>
 
         {/* Product Grid */}
-        <div className="product-grid mb-12">
-          {filteredProducts.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              onAddToCart={onAddToCart}
-            />
-          ))}
-        </div>
+        {loading ? (
+          <div className="py-20 text-center text-muted-foreground">
+            Loading products...
+          </div>
+        ) : (
+          <>
+            <div className="product-grid mb-12">
+              {filteredProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  onAddToCart={onAddToCart}
+                />
+              ))}
 
-        {/* Load More */}
-        <div className="text-center">
-          <Button variant="outline" size="lg">
-            Load More Products
-          </Button>
-        </div>
+              {!filteredProducts.length && (
+                <p className="text-center text-muted-foreground col-span-full">
+                  No products found.
+                </p>
+              )}
+            </div>
+
+            {/* Load More – hook up pagination later if you want */}
+            <div className="text-center">
+              <Button variant="outline" size="lg">
+                Load More Products
+              </Button>
+            </div>
+          </>
+        )}
       </div>
     </section>
   );

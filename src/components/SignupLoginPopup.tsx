@@ -243,7 +243,15 @@ export const SignupLoginPopup = ({ isOpen, onClose, onSuccess }: SignupLoginPopu
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        // Handle specific OAuth errors
+        if (error.message.includes('provider is not enabled')) {
+          toast.error(`${provider.charAt(0).toUpperCase() + provider.slice(1)} sign-in is not configured yet. Please use email/password instead.`);
+          setIsLoading(false);
+          return;
+        }
+        throw error;
+      }
 
       // OAuth will redirect, so we don't need to set loading to false
       toast.success(`Redirecting to ${provider}...`);

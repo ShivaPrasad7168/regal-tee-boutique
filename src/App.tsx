@@ -24,6 +24,9 @@ import Profile from "./pages/Profile";
 import { useSupabaseUser } from "@/hooks/useSupabaseUser"; // ✅ Added
 import { SignupLoginPopup } from "@/components/SignupLoginPopup"; // ✅ Added global popup
 
+import { RequireAdmin } from "@/components/RequireAdmin";
+import { AdminDashboard } from "@/components/admin/AdminDashboard";
+
 const queryClient = new QueryClient();
 
 const App = () => {
@@ -93,6 +96,14 @@ const App = () => {
                       <Route path="/wishlist" element={<Wishlist />} />
                       <Route path="/compare" element={<Compare />} />
                       <Route path="*" element={<NotFound />} />
+                      {/*Admin Routes */}
+                      <Route path="/admin" element={
+                            <RequireAdmin>
+                              <AdminDashboard />
+                            </RequireAdmin>
+                          }
+                        />
+
                     </Routes>
                   </CompareProvider>
                 </WishlistProvider>
