@@ -11,6 +11,7 @@ import { SocialProofPopup } from "@/components/SocialProofPopup";
 import AnimatedLogo from "@/components/AnimatedLogo";
 import { SignupLoginPopup } from "@/components/SignupLoginPopup";
 import { ReferralPaymentPopup } from "@/components/ReferralPaymentPopup";
+import OrderConfirmation from "@/components/OrderConfirmation";
 
 import { useState } from "react";
 import { useWishlist } from "@/contexts/WishlistContext";
@@ -31,13 +32,13 @@ const Index = () => {
     loginOpen,
     setLoginOpen,
   } = useCart();
-  const [paymentOpen, setPaymentOpen] = useState(false);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
   const { toast } = useToast();
   const { wishlistIds } = useWishlist();
 
   const handleCheckout = async () => {
     const { data, error } = await supabase.auth.getUser();
-    
+
     if (error || !data.user) {
       toast({
         title: "Authentication required",
@@ -46,20 +47,20 @@ const Index = () => {
       setLoginOpen(true);
       return;
     }
-    
+
     setIsLoggedIn(true);
     setCartOpen(false);
-    setPaymentOpen(true);
+    setCheckoutOpen(true);
   };
 
   const handleAddToCart = async (product: Product) => {
     const { data } = await supabase.auth.getUser();
-    
+
     if (!data.user) {
       setLoginOpen(true);
       return;
     }
-    
+
     addToCart(product);
     setIsLoggedIn(true);
     toast({
@@ -90,7 +91,7 @@ const Index = () => {
         onCartClick={() => setCartOpen(true)}
         onLoginClick={() => setLoginOpen(true)}
       />
-      
+
       <main>
         <Hero />
         <ProductCollection onAddToCart={handleAddToCart} />
@@ -131,14 +132,23 @@ const Index = () => {
         onSuccess={() => setIsLoggedIn(true)}
       />
 
-      <ReferralPaymentPopup
-        isOpen={paymentOpen}
-        onClose={() => setPaymentOpen(false)}
-        totalAmount={totalAmount}
-      />
+      {checkoutOpen && (
+        <OrderConfirmation
+          cartItems={cartItems}
+          totalAmount={totalAmount}
+          onClose={() => setCheckoutOpen(false)}
+          onSuccess={() => {
+            setCheckoutOpen(false);
+            toast({
+              title: "Order placed successfully!",
+              description: "Your order has been saved. Please complete payment and shipping on the Shiprocket website.",
+            });
+          }}
+        />
+      )}
 
       <SocialProofPopup />
-      
+
     </div>
   );
 };

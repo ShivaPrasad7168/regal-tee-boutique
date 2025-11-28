@@ -31,6 +31,86 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
+  // Load cart items from database
+  const loadCartFromDatabase = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('cart_items')
+        .select(`
+          quantity,
+          products (
+            id,
+            name,
+            description,
+            slug,
+            price,
+            image_url,
+            category,
+            stock
+          )
+        `)
+        .eq('user_id', userId);
+
+      if (error) {
+        console.error('Error loading cart:', error);
+        return;
+      }
+
+      const cartItems: CartItem[] = (data || []).map((item: any) => ({
+        id: item.products.id,
+        name: item.products.name,
+        description: item.products.description || '',
+        slug: item.products.slug || '',
+        price: Number(item.products.price),
+        image_url: item.products.image_url || '',
+        category: item.products.category || '',
+        quantity: item.quantity,
+        stock: item.products.stock || 0,
+      }));
+
+      setCartItems(cartItems);
+    } catch (error) {
+      console.error('Error loading cart from database:', error);
+    }
+  };
+
+  // Save cart item to database
+  const saveCartItemToDatabase = async (userId: string, productId: string, quantity: number) => {
+    try {
+      const { error } = await supabase
+        .from('cart_items')
+        .upsert({
+          user_id: userId,
+          product_id: productId,
+          quantity: quantity,
+          updated_at: new Date().toISOString(),
+        });
+
+      if (error) {
+        console.error('Error saving cart item:', error);
+      }
+    } catch (error) {
+      console.error('Error saving cart item to database:', error);
+    }
+  };
+
+  // Remove cart item from database
+  const removeCartItemFromDatabase = async (userId: string, productId: string) => {
+    try {
+      const { error } = await supabase
+        .from('cart_items')
+        .delete()
+        .eq('user_id', userId)
+        .eq('product_id', productId);
+
+      if (error) {
+        console.error('Error removing cart item:', error);
+      }
+    } catch (error) {
+      console.error('Error removing cart item from database:', error);
+    }
+  };
+
   // Check authentication state on mount and listen for changes
   useEffect(() => {
     const getInitialSession = async () => {
@@ -38,6 +118,11 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       const currentUser = session?.user || null;
       setUser(currentUser);
       setIsLoggedIn(!!currentUser);
+
+      if (currentUser) {
+        await loadCartFromDatabase(currentUser.id);
+      }
+
       setLoading(false);
     };
 
@@ -48,12 +133,14 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         const currentUser = session?.user || null;
         setUser(currentUser);
         setIsLoggedIn(!!currentUser);
-        setLoading(false);
 
-        // Clear cart if user logs out
-        if (event === 'SIGNED_OUT') {
+        if (event === 'SIGNED_IN' && currentUser) {
+          await loadCartFromDatabase(currentUser.id);
+        } else if (event === 'SIGNED_OUT') {
           setCartItems([]);
         }
+
+        setLoading(false);
       }
     );
 

@@ -61,8 +61,7 @@ export const ProductDetail = ({ user, openAuthPopup }: ProductDetailProps) => {
 
   const { id } = useParams();
 
-  // If id column in Supabase is numeric, convert id string to number here
-  const productId = isNaN(Number(id)) ? id : Number(id);
+  const productId = id;
   const navigate = useNavigate();
   const { isInWishlist, toggleWishlist } = useWishlist();
 
@@ -107,7 +106,7 @@ export const ProductDetail = ({ user, openAuthPopup }: ProductDetailProps) => {
         return;
       }
 
-      setProduct(productData as Product);
+      setProduct(productData as unknown as Product);
 
       // 2️⃣ Fetch related products by category
       if (productData.category) {
@@ -122,7 +121,7 @@ export const ProductDetail = ({ user, openAuthPopup }: ProductDetailProps) => {
           console.error("Error fetching related products:", relError);
           setRelatedProducts([]);
         } else {
-          setRelatedProducts((related ?? []) as Product[]);
+          setRelatedProducts((related ?? []) as unknown as Product[]);
         }
       } else {
         setRelatedProducts([]);
@@ -140,11 +139,13 @@ export const ProductDetail = ({ user, openAuthPopup }: ProductDetailProps) => {
 
       if (imageError) {
         console.error("Error fetching product images:", imageError);
-        setProductImages([]);
-      } else if (imageData) {
+        // Fallback to product.image_url if no images in product_images table
+        setProductImages(productData.image_url ? [productData.image_url] : []);
+      } else if (imageData && imageData.length > 0) {
         setProductImages(imageData.map((img) => img.url));
       } else {
-        setProductImages([]);
+        // Fallback to product.image_url if no images in product_images table
+        setProductImages(productData.image_url ? [productData.image_url] : []);
       }
 
       setLoading(false);
@@ -671,7 +672,7 @@ export const ProductDetail = ({ user, openAuthPopup }: ProductDetailProps) => {
                 >
                   <div className="aspect-square bg-secondary">
                     <img
-                      src={relatedProduct.image}
+                      src={relatedProduct.image_url}
                       alt={relatedProduct.name}
                       className="w-full h-full object-cover"
                     />

@@ -57,7 +57,7 @@ export const ShoppingCart = ({
                   className="flex gap-4 p-4 rounded-lg border border-border bg-background/50"
                 >
                   <img
-                    src={item.image}
+                    src={item.image_url}
                     alt={item.name}
                     className="w-20 h-20 object-cover rounded-md"
                   />

@@ -13,9 +13,9 @@ export interface Product {
   id: string; // uuid
   name: string;
   description: string;
-  slug: string;
+  slug?: string;
   price: number;
-  image: string; // local image path
+  image_url: string; // image url from database
   images?: string[];
   category?: string;
   discount?: number;
@@ -52,7 +52,7 @@ export const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
           onClick={() => navigate(`/product/${product.id}`)}
         >
             <img
-              src={product.image}
+              src={product.image_url}
               alt={product.name}
             className={`w-full h-full object-cover transition-transform duration-500 ${
               isHovered ? "scale-110" : "scale-100"

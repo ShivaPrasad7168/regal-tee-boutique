@@ -8,7 +8,6 @@ import { Smartphone, CreditCard, Banknote, QrCode, Package, MapPin, Wallet, Load
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Textarea } from "@/components/ui/textarea";
-import { initiateGokwikPayment } from "@/services/paymentService";
 import { useCart } from "@/contexts/CartContext";
 
 interface PaymentPopupProps {
@@ -80,63 +79,71 @@ export const ReferralPaymentPopup = ({ isOpen, onClose, totalAmount }: PaymentPo
       return;
     }
 
-    if (selectedMethod === "cod") {
-      const advance = parseFloat(advanceAmount);
-      if (!advance || advance < 49) {
-        toast({
-          title: "Advance payment required",
-          description: "Please enter an advance amount of at least ₹49",
-          variant: "destructive",
-        });
-        return;
-      }
-      // Handle COD payment (mock for now)
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
       toast({
-        title: "Order confirmed! 🎉",
-        description: "Your COD order has been placed successfully.",
+        title: "Authentication required",
+        description: "Please sign in to place an order",
+        variant: "destructive",
       });
-      onClose();
       return;
     }
 
-    // Handle Gokwik payment for prepaid methods
     setIsProcessing(true);
     try {
       const shippingAddress = `${deliveryDetails.address}, ${deliveryDetails.city}, ${deliveryDetails.state} - ${deliveryDetails.pincode}`;
 
-      // Prepare cart items for payment
-      const paymentItems = cartItems.map(item => ({
-        productId: item.id,
+      // Create the order
+      const { data: orderData, error: orderError } = await supabase
+        .from('orders')
+        .insert({
+          user_id: user.id,
+          total_amount: totalAmount,
+          status: selectedMethod === "cod" ? "pending" : "processing",
+          payment_gateway: "shiprocket",
+          payment_status: selectedMethod === "cod" ? "pending" : "pending",
+          shipping_address: shippingAddress,
+        })
+        .select()
+        .single();
+
+      if (orderError) {
+        throw new Error(`Failed to create order: ${orderError.message}`);
+      }
+
+      // Create order items
+      const orderItems = cartItems.map(item => ({
+        order_id: orderData.id,
+        product_id: item.id,
         quantity: item.quantity,
         price: item.price,
       }));
 
-      const paymentAmount = selectedMethod === "cod" ? 49 : Math.round(totalAmount * 0.9);
+      const { error: itemsError } = await supabase
+        .from('order_items')
+        .insert(orderItems);
 
-      const paymentData = {
-        amount: paymentAmount,
-        currency: "INR",
-        customerName: deliveryDetails.name,
-        customerEmail: "", // Will be filled from session in service
-        customerPhone: deliveryDetails.phone,
-        items: paymentItems,
-        shippingAddress,
-      };
-
-      const result = await initiateGokwikPayment(paymentData);
-
-      if (result.success && result.paymentUrl) {
-        // Clear cart on successful payment initiation
-        cartItems.forEach(item => removeItem(item.id));
-        // Redirect to Gokwik payment page
-        window.location.href = result.paymentUrl;
-      } else {
-        throw new Error(result.error || "Payment initiation failed");
+      if (itemsError) {
+        throw new Error(`Failed to create order items: ${itemsError.message}`);
       }
-    } catch (error) {
-      console.error("Payment error:", error);
+
+      // Clear cart
+      cartItems.forEach(item => removeItem(item.id));
+
+      // Show success message
       toast({
-        title: "Payment failed",
+        title: "Order placed successfully! 🎉",
+        description: selectedMethod === "cod"
+          ? "Your COD order has been placed. Payment will be collected on delivery."
+          : "Your order has been saved. Payment will be handled manually on Shiprocket.",
+      });
+
+      onClose();
+    } catch (error) {
+      console.error("Order creation error:", error);
+      toast({
+        title: "Order failed",
         description: error instanceof Error ? error.message : "Something went wrong",
         variant: "destructive",
       });

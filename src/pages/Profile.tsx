@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import { User, Package, MapPin, LogOut, Truck, CheckCircle2, Clock } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useWishlist } from "@/contexts/WishlistContext";
-import { getOrderHistory } from "@/services/paymentService";
+
 
 export const Profile = () => {
   const navigate = useNavigate();
@@ -64,8 +64,18 @@ export const Profile = () => {
     }
 
     // Fetch order history
-    const orderHistory = await getOrderHistory();
-    setOrders(orderHistory);
+    const { data: orderHistory, error: orderError } = await supabase
+      .from('orders')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+
+    if (orderError) {
+      console.error('Error fetching orders:', orderError);
+      setOrders([]);
+    } else {
+      setOrders(orderHistory || []);
+    }
 
     setLoading(false);
   };

@@ -49,35 +49,46 @@ export const ProductCollection = ({ onAddToCart }: ProductCollectionProps) => {
     const fetchProducts = async () => {
       setLoading(true);
 
-      const { data, error } = await supabase
+      // Fetch products with their first image from product_images table
+      const { data: productsData, error: productsError } = await supabase
         .from("products")
-        .select("*")
+        .select(`
+          *,
+          product_images(url, position)
+        `)
         .order("created_at", { ascending: false });
-        console.log("PRODUCTS DATA =>", data);
-        console.log("PRODUCTS ERROR =>", error);
-      if (error) {
-        console.error("Error loading products:", error);
+
+      console.log("PRODUCTS DATA =>", productsData);
+      console.log("PRODUCTS ERROR =>", productsError);
+
+      if (productsError) {
+        console.error("Error loading products:", productsError);
         setLoading(false);
         return;
       }
 
-      const mapped: Product[] = (data as DbProduct[]).map((row) => ({
-        id: row.id,
-        name: row.name,
-        description: row.description ?? "",
-        // if you add a slug column later, use that. for now fallback to category
-        slug: row.slug ?? row.category ?? "",
-        price: Number(row.price),
-        // IMPORTANT: in DB store like `/products/product-1.jpg`
-        image: row.image_url || "/products/placeholder.jpg",
-        category: row.category || "",
-        discount: row.discount ?? undefined,
-        rating: row.rating ?? undefined,
-        reviewCount: row.review_count ?? undefined,
-        isNew: row.is_new ?? false,
-        stock: row.stock ?? 0,
-        specs: {}, // extend later if you store specs in DB
-      }));
+      const mapped: Product[] = (productsData as any[]).map((row) => {
+        // Get the first image from product_images, or fallback to products.image_url
+        const firstImage = row.product_images?.[0]?.url || row.image_url || "/products/placeholder.jpg";
+
+        return {
+          id: row.id,
+          name: row.name,
+          description: row.description ?? "",
+          // if you add a slug column later, use that. for now fallback to category
+          slug: row.slug ?? row.category ?? "",
+          price: Number(row.price),
+          // Use the first image from product_images table for homepage display
+          image_url: firstImage,
+          category: row.category || "",
+          discount: row.discount ?? undefined,
+          rating: row.rating ?? undefined,
+          reviewCount: row.review_count ?? undefined,
+          isNew: row.is_new ?? false,
+          stock: row.stock ?? 0,
+          specs: {}, // extend later if you store specs in DB
+        };
+      });
 
       setProducts(mapped);
       setLoading(false);
